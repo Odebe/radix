@@ -247,12 +247,11 @@ module Radix
       # special consideration when comparing the first node vs. others
       # in case of node key and path being the same, return the node
       # instead of walking character by character
-      if first && (path.bytesize == node.key.bytesize && path == node.key) && node.payload?
-        result.use node
-        return
-      end
-
       catch :done do
+        if first && (path.bytesize == node.key.bytesize && path == node.key) && node.payload?
+          result.use node
+          throw :done
+        end
 
         key_reader = Char::Reader.new(node.key)
         path_reader = Char::Reader.new(path)
