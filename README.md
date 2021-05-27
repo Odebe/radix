@@ -1,19 +1,14 @@
-# Radix Tree
+# Radix Tree (BUT FOR RUBY)
 
 [Radix tree](https://en.wikipedia.org/wiki/Radix_tree) implementation for
-Crystal language
-
-[![CI](https://github.com/luislavena/radix/workflows/CI/badge.svg)](https://github.com/luislavena/radix/actions)
-[![Latest Release](https://img.shields.io/github/release/luislavena/radix.svg)](https://github.com/luislavena/radix/releases)
+Crystal language but ported to Ruby
 
 ## Installation
 
-Add this to your application's `shard.yml`:
+Add this to your application's `Gemfile`:
 
-```yaml
-dependencies:
-  radix:
-    github: luislavena/radix
+```ruby
+gem 'radix', git: 'https://github.com/Odebe/radix'
 ```
 
 ## Usage
@@ -22,10 +17,10 @@ dependencies:
 
 You can associate a *payload* with each path added to the tree:
 
-```crystal
+```ruby
 require "radix"
 
-tree = Radix::Tree(Symbol).new
+tree = Radix::Tree.new
 tree.add "/products", :products
 tree.add "/products/featured", :featured
 
@@ -38,8 +33,8 @@ end
 
 The types allowed for payload are defined on Tree definition:
 
-```crystal
-tree = Radix::Tree(Symbol).new
+```ruby
+tree = Radix::Tree.new
 
 # Good, since Symbol is allowed as payload
 tree.add "/", :root
@@ -50,8 +45,8 @@ tree.add "/meaning-of-life", 42
 
 Can combine multiple types if needed:
 
-```crystal
-tree = Radix::Tree(Int32 | String | Symbol).new
+```ruby
+tree = Radix::Tree.new
 
 tree.add "/", :root
 tree.add "/meaning-of-life", 42
@@ -62,13 +57,13 @@ tree.add "/hello", "world"
 
 You can also extract values from placeholders (as named segments or globbing):
 
-```crystal
+```ruby
 tree.add "/products/:id", :product
 
 result = tree.find "/products/1234"
 
 if result.found?
-  puts result.params["id"]? # => "1234"
+  puts result.params["id"] # => "1234"
 end
 ```
 
@@ -82,7 +77,7 @@ is no exception.
 When designing and adding *paths* to a Tree, please consider that two different
 named parameters cannot share the same level:
 
-```crystal
+```ruby
 tree.add "/", :root
 tree.add "/:post", :post
 tree.add "/:category/:post", :category_post # => Radix::Tree::SharedKeyError
@@ -99,7 +94,7 @@ For example, following a good SEO practice will be consider `/:post` as
 absolute permalink for the post and have a list of categories which links to
 the permalinks of the posts under that category:
 
-```crystal
+```ruby
 tree.add "/", :root
 tree.add "/:post", :post                    # this is post permalink
 tree.add "/categories", :categories         # list of categories
@@ -126,4 +121,6 @@ Crystal's features.
 
 ## Contributors
 
-- [Luis Lavena](https://github.com/luislavena) - creator, maintainer
+- [Odebe](https://github.com/Odebe) - guy who ported it to ruby for some reason
+- [Luis Lavena](https://github.com/luislavena) - creator
+
