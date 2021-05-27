@@ -1,5 +1,4 @@
 require_relative "char/reader.rb"
-
 require_relative "node.rb"
 require_relative "result.rb"
 
