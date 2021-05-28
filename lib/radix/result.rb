@@ -15,7 +15,7 @@ module Radix
   class Result
     # @key : String?
 
-    attr_reader :params, :payload
+    attr_reader :key, :params, :payload
 
     # :nodoc:
     def initialize

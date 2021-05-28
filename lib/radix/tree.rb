@@ -134,7 +134,7 @@ module Radix
         # of the path
         added = false
 
-        new_key = path_reader.string.byte_slice(path_reader.pos)
+        new_key = path_reader.string[path_reader.pos..-1]
         node.children.each do |child|
           # if child's key starts with named parameter, compare key until
           # separator (if present).
@@ -175,7 +175,7 @@ module Radix
         # children nodes
 
         # build new node with partial key and adjust existing one
-        new_key = node.key.byte_slice(path_reader.pos)
+        new_key = node.key[path_reader.pos..-1]
         swap_payload = node.payload? ? node.payload : nil
 
         new_node = Node.new(new_key, swap_payload)
@@ -186,13 +186,13 @@ module Radix
         node.children.clear
 
         # adjust existing node key to new partial one
-        node.key = path_reader.string.byte_slice(0, path_reader.pos)
+        node.key = path_reader.string[0, path_reader.pos]
         node.children << new_node
         node.sort!
 
         # determine if path still continues
         if path_reader.pos < path.bytesize
-          new_key = path.byte_slice(path_reader.pos)
+          new_key = path[path_reader.pos..-1]
           node.children << Node.new(new_key, payload)
           node.sort!
 
@@ -330,13 +330,14 @@ module Radix
           end
 
           # not found in current node, check inside children nodes
-          new_path = path_reader.string.byte_slice(path_reader.pos)
+          new_path = path_reader.string[path_reader.pos..-1]
           node.children.each do |child|
             # check if child key is a named parameter, catch all or shares parts
             # with new path
+
             if (child.glob? || child.named?) || _shared_key?(new_path, child.key)
               # traverse branch to determine if valid
-              find new_path, result, child
+              find new_path, result, child, false
 
               if result.found?
                 # stop iterating over nodes
@@ -349,7 +350,7 @@ module Radix
           end
 
           # path differs from key, no use searching anymore
-          return
+          throw :done
         end
 
         # key still contains characters to walk

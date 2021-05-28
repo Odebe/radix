@@ -13,12 +13,11 @@ module Radix
   class Node
     include Comparable
 
-    # :nodoc:
-    # enum Kind : UInt8
-    #   Normal
-    #   Named
-    #   Glob
-    # end
+    module Kind
+      Normal = 0
+      Named = 1
+      Glob = 2
+    end
 
     # getter key
     # getter? placeholder
@@ -26,14 +25,14 @@ module Radix
     # property! payload : T | Nil
 
     attr_reader :key, :placeholder
-    attr_accessor :property, :payload
+    attr_accessor :property, :payload, :children
 
     def payload?
       !payload.nil?
     end
 
     def placeholder?
-      !placeholder.nil?
+      placeholder
     end
 
     # :nodoc:
@@ -85,6 +84,8 @@ module Radix
       @payload = payload
       @placeholder = placeholder
       @priority = compute_priority
+      @children = []
+      @kind = Kind::Normal
     end
 
     # Compares this node against *other*, returning `-1`, `0` or `1` depending
@@ -137,7 +138,7 @@ module Radix
     # node.glob? # => false
     # ```
     def glob?
-      kind.glob?
+      kind == Kind::Glob
     end
 
     # Changes current *key*
@@ -164,8 +165,9 @@ module Radix
     # # => 6
     # ```
     def key=(key)
+      @key = key
       # reset kind on change of key
-      @kind = :normal # Kind::Normal
+      @kind = Kind::Normal
       @priority = compute_priority
     end
 
@@ -179,7 +181,7 @@ module Radix
     # node.named? # => false
     # ```
     def named?
-      kind.named?
+      kind == Kind::Named
     end
 
     # Returns `true` if the node key does not contain an special parameter
@@ -193,7 +195,11 @@ module Radix
     # node.normal? # => false
     # ```
     def normal?
-      kind.normal?
+      kind == Kind::Normal
+    end
+
+    def sort!
+      @children.sort!
     end
 
     # :nodoc:
@@ -205,10 +211,10 @@ module Radix
       while reader.has_next?
         case reader.current_char
         when '*'
-          @kind =:glob  #Kind::Glob
+          @kind = Kind::Glob
           break
         when ':'
-          @kind = :named # Kind::Named
+          @kind = Kind::Named
           break
         else
           reader.next_char
@@ -216,13 +222,6 @@ module Radix
       end
 
       reader.pos
-    end
-
-    # :nodoc:
-    protected
-
-    def sort!
-      @children.sort!
     end
   end
 end
